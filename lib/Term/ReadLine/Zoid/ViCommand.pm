@@ -537,12 +537,14 @@ sub vi_F {
 	my ($l, $x) = ( $$self{lines}[ $$self{pos}[1] ], $$self{pos}[0] );
 	if ($key eq 'T' or $key eq 'F') {
 		$l = substr($l, 0, $x);
-		return $self->bell unless $l =~ /.*((?:$chr.*){$cnt})$/;
+		# We do not want $chr to be interpreted as pattern metacharacters
+		# Avoid 'unmatched "(" in regex'
+		return $self->bell unless $l =~ /.*((?:\Q$chr\E.*){$cnt})$/;
 		$$self{pos}[0] -= length($1) - (($key eq 'T') ? 1 : 0);
 		return length($1);
 	}
 	else { # ($key eq 't' || $key eq 'f')
-		return $self->bell unless $l =~ /^..{$x}((?:.*?$chr){$cnt})/;
+		return $self->bell unless $l =~ /^..{$x}((?:.*?\Q$chr\E){$cnt})/;
 		$$self{pos}[0] += length($1) - (($key eq 't') ? 1 : 0);
 		return length($1);
 	}
